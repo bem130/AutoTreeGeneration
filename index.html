@@ -8,20 +8,22 @@
 </html>
 <script>
 
-const size = [700,700]
+const size = [1500,800]
 
 const cnv = document.querySelector("#out");
 const ctx = cnv.getContext("2d");
 
-const RootLen = 100;
-const RootRad = 5;
-const RootAngle = 0.8;
-const Ps = 0.6;
-const Prs = 0.7;
-const Psi = 0.7;
-const Prsi = 0.8;
-const Pa = 1.2;
-const Pai = 0.6;
+const RootLen = 150; // 長さの基準
+const RootRad = 5; // 太さの基準
+const RootAngle = 0.8; // 傾きの基準
+const Ps = 0.6; // 長さの比 世代間
+const Psi = 0.7; // 長さの比 兄弟間
+const Prs = 0.7; // 太さの比 世代間
+const Prsi = 0.8; // 太さの比 兄弟間
+const Pa = 1.2; // 角度の比 世代間
+const Pai = 1.5; // 角度の比 兄弟間
+const branchColor = [[0,20],[25,40],[15,25]]; // 枝の色
+const leafColor = [[80,120],[20,40],[1,40]]; // 葉の色
 
 function lengthN(n,i) {
     return RootLen*(Ps**(n-1))*(Psi**(i-1));
@@ -32,6 +34,11 @@ function radiusN(n,i) {
 function newAngle(n,i) {
     return (Math.random()-0.5)*RootAngle*(Pa**(n-1))*(Pai**(i-1));
 }
+
+function rnd(min,max) {
+    return Math.random()*(max-min)+min;
+}
+
 function rotateVec(vec,angle) {
     return [
         vec[0]*Math.cos(angle)-vec[1]*Math.sin(angle),
@@ -50,27 +57,28 @@ cnv.width = size[0];
 cnv.height = size[1];
 start();
 function start() {
-    newBranch(10,1,[0,1],[size[0]/2,size[1]]);
+    for (let i=0;i<8;i++) {
+        newBranch(10,1,[0,1],[rnd(0+50,size[0]-50),size[1]]);
+    }
 }
-function newBranch(max,n,vec,startPos) {
-    for (let i=0;i<3;i++) {
+function newBranch(max,n,vec,startPos,I=1) {
+    for (let i=0;i<I;i++) {
         const nangle = rotateVec(vec,newAngle(n,i));
         const npos = addVec(startPos,scaleVec(nangle,-lengthN(n,i)));
-        console.log("path",startPos,npos);
+        if (n<max) {
+            newBranch(max,n+1,nangle,npos,Math.random()*2+2);
+        }
         ctx.lineWidth = radiusN(n,i);
-        if (n<max-2) {
-            ctx.strokeStyle = `hsl(10,50%,20%)`;
+        if (n<7) {
+            ctx.strokeStyle = `hsl(${rnd(...branchColor[0])},${rnd(...branchColor[1])}%,${rnd(...branchColor[2])}%)`;
         }
         else {
-            ctx.strokeStyle = `hsl(100,30%,30%)`;
+            ctx.strokeStyle = `hsl(${rnd(...leafColor[0])},${rnd(...leafColor[1])}%,${rnd(...leafColor[2])}%)`;
         }
         ctx.beginPath();
         ctx.moveTo(...startPos);
         ctx.lineTo(...npos);
         ctx.stroke();
-        if (n<max) {
-            newBranch(max,n+1,nangle,npos);
-        }
     }
 }
 
