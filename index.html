@@ -13,26 +13,14 @@ const size = [1500,800]
 const cnv = document.querySelector("#out");
 const ctx = cnv.getContext("2d");
 
-const RootLen = 150; // 長さの基準
-const RootRad = 5; // 太さの基準
-const RootAngle = 0.8; // 傾きの基準
-const Ps = 0.6; // 長さの比 世代間
-const Psi = 0.7; // 長さの比 兄弟間
-const Prs = 0.7; // 太さの比 世代間
-const Prsi = 0.8; // 太さの比 兄弟間
-const Pa = 1.2; // 角度の比 世代間
-const Pai = 1.5; // 角度の比 兄弟間
-const branchColor = [[0,20],[25,40],[15,25]]; // 枝の色
-const leafColor = [[80,120],[20,40],[1,40]]; // 葉の色
-
-function lengthN(n,i) {
-    return RootLen*(Ps**(n-1))*(Psi**(i-1));
+function lengthN(param,n,i) {
+    return param.RootLen*(param.Ps**(n-1))*(param.Psi**(i-1));
 }
-function radiusN(n,i) {
-    return RootRad*(Prs**(n-1))*(Prsi**(i-1));
+function radiusN(param,n,i) {
+    return param.RootRad*(param.Prs**(n-1))*(param.Prsi**(i-1));
 }
-function newAngle(n,i) {
-    return (Math.random()-0.5)*RootAngle*(Pa**(n-1))*(Pai**(i-1));
+function newAngle(param,n,i) {
+    return (Math.random()-0.5)*param.RootAngle*(param.Pa**(n-1))*(param.Pai**(i-1));
 }
 
 function rnd(min,max) {
@@ -58,22 +46,35 @@ cnv.height = size[1];
 start();
 function start() {
     for (let i=0;i<8;i++) {
-        newBranch(10,1,[0,1],[rnd(0+50,size[0]-50),size[1]]);
+        const param = {
+            RootLen: 150, // 長さの基準
+            RootRad: 5, // 太さの基準
+            RootAngle: 0.8, // 傾きの基準
+            Ps: 0.6, // 長さの比 世代間
+            Psi: 0.6, // 長さの比 兄弟間
+            Prs: 0.7, // 太さの比 世代間
+            Prsi: 0.8, // 太さの比 兄弟間
+            Pa: 1.2, // 角度の比 世代間
+            Pai: 1.5, // 角度の比 兄弟間
+            branchColor: [[0,20],[25,40],[15,25]], // 枝の色
+            leafColor: [[80,120],[20,40],[1,40]], // 葉の色
+        }
+        newBranch(param,9,1,[0,1],[rnd(0+50,size[0]-50),size[1]]);
     }
 }
-function newBranch(max,n,vec,startPos,I=1) {
+function newBranch(param,max,n,vec,startPos,I=1) {
     for (let i=0;i<I;i++) {
-        const nangle = rotateVec(vec,newAngle(n,i));
-        const npos = addVec(startPos,scaleVec(nangle,-lengthN(n,i)));
+        const nangle = rotateVec(vec,newAngle(param,n,i));
+        const npos = addVec(startPos,scaleVec(nangle,-lengthN(param,n,i)));
         if (n<max) {
-            newBranch(max,n+1,nangle,npos,Math.random()*2+2);
+            newBranch(param,max,n+1,nangle,npos,Math.random()*2+2);
         }
-        ctx.lineWidth = radiusN(n,i);
+        ctx.lineWidth = radiusN(param,n,i);
         if (n<7) {
-            ctx.strokeStyle = `hsl(${rnd(...branchColor[0])},${rnd(...branchColor[1])}%,${rnd(...branchColor[2])}%)`;
+            ctx.strokeStyle = `hsl(${rnd(...param.branchColor[0])},${rnd(...param.branchColor[1])}%,${rnd(...param.branchColor[2])}%)`;
         }
         else {
-            ctx.strokeStyle = `hsl(${rnd(...leafColor[0])},${rnd(...leafColor[1])}%,${rnd(...leafColor[2])}%)`;
+            ctx.strokeStyle = `hsl(${rnd(...param.leafColor[0])},${rnd(...param.leafColor[1])}%,${rnd(...param.leafColor[2])}%)`;
         }
         ctx.beginPath();
         ctx.moveTo(...startPos);
