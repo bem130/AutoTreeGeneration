@@ -8,7 +8,7 @@
 </html>
 <script>
 
-const size = [1500,800]
+const size = [1700,900]
 
 const cnv = document.querySelector("#out");
 const ctx = cnv.getContext("2d");
@@ -45,36 +45,38 @@ cnv.width = size[0];
 cnv.height = size[1];
 start();
 function start() {
-    for (let i=0;i<8;i++) {
+    for (let i=0;i<30;i++) {
         const param = {
-            RootLen: 150, // 長さの基準
-            RootRad: 5, // 太さの基準
-            RootAngle: 0.8, // 傾きの基準
-            Ps: 0.6, // 長さの比 世代間
-            Psi: 0.6, // 長さの比 兄弟間
-            Prs: 0.7, // 太さの比 世代間
-            Prsi: 0.8, // 太さの比 兄弟間
-            Pa: 1.2, // 角度の比 世代間
-            Pai: 1.5, // 角度の比 兄弟間
-            branchColor: [[0,20],[25,40],[15,25]], // 枝の色
-            leafColor: [[80,120],[20,40],[1,40]], // 葉の色
+            RootLen: rnd(30,160), // 長さの基準
+            RootRad: rnd(3,6), // 太さの基準
+            RootAngle: rnd(0.5,1), // 傾きの基準
+            Ps: rnd(0.6,0.65), // 長さの比 世代間
+            Psi: rnd(0.4,0.7), // 長さの比 兄弟間
+            Prs: rnd(0.6,0.7), // 太さの比 世代間
+            Prsi: rnd(0.6,0.7), // 太さの比 兄弟間
+            Pa: rnd(1.1,1.4), // 角度の比 世代間
+            Pai: rnd(1.2,2), // 角度の比 兄弟間
+            branchNum: [rnd(1,2),rnd(1,2)], // 枝分かれのしやすさ
+            branchColor: [[rnd(0,15),rnd(15,30)],[rnd(20,30),rnd(30,50)],[rnd(10,20),rnd(20,45)]], // 枝の色
+            leafColor: [[rnd(60,95),rnd(100,120)],[rnd(15,30),rnd(30,45)],[rnd(0,15),rnd(30,55)]], // 葉の色
         }
-        newBranch(param,9,1,[0,1],[rnd(0+50,size[0]-50),size[1]]);
+        newBranch(param,11,1,[0,-1],[rnd(0+50,size[0]-50),size[1]]);
     }
 }
 function newBranch(param,max,n,vec,startPos,I=1) {
     for (let i=0;i<I;i++) {
         const nangle = rotateVec(vec,newAngle(param,n,i));
-        const npos = addVec(startPos,scaleVec(nangle,-lengthN(param,n,i)));
+        const npos = addVec(startPos,scaleVec(nangle,lengthN(param,n,i)));
         if (n<max) {
-            newBranch(param,max,n+1,nangle,npos,Math.random()*2+2);
+            newBranch(param,max,n+1,nangle,npos,Math.random()*param.branchNum[1]+param.branchNum[0]);
         }
-        ctx.lineWidth = radiusN(param,n,i);
-        if (n<7) {
+        if (n<8) {
             ctx.strokeStyle = `hsl(${rnd(...param.branchColor[0])},${rnd(...param.branchColor[1])}%,${rnd(...param.branchColor[2])}%)`;
+            ctx.lineWidth = radiusN(param,n,i);
         }
         else {
             ctx.strokeStyle = `hsl(${rnd(...param.leafColor[0])},${rnd(...param.leafColor[1])}%,${rnd(...param.leafColor[2])}%)`;
+            ctx.lineWidth = radiusN(param,n,i)*2;
         }
         ctx.beginPath();
         ctx.moveTo(...startPos);
