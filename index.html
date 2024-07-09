@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <canvas id="out"></canvas>
+    </body>
+</html>
+<script>
+
+const size = [700,700]
+
+const cnv = document.querySelector("#out");
+const ctx = cnv.getContext("2d");
+
+const RootLen = 100;
+const RootRad = 5;
+const RootAngle = 0.8;
+const Ps = 0.6;
+const Prs = 0.7;
+const Psi = 0.7;
+const Prsi = 0.8;
+const Pa = 1.2;
+const Pai = 0.6;
+
+function lengthN(n,i) {
+    return RootLen*(Ps**(n-1))*(Psi**(i-1));
+}
+function radiusN(n,i) {
+    return RootRad*(Prs**(n-1))*(Prsi**(i-1));
+}
+function newAngle(n,i) {
+    return (Math.random()-0.5)*RootAngle*(Pa**(n-1))*(Pai**(i-1));
+}
+function rotateVec(vec,angle) {
+    return [
+        vec[0]*Math.cos(angle)-vec[1]*Math.sin(angle),
+        vec[0]*Math.sin(angle)+vec[1]*Math.cos(angle),
+    ];
+}
+function scaleVec(vec,scale) {
+    return [vec[0]*scale,vec[1]*scale];
+}
+function addVec(a,b) {
+    console.log(a,b)
+    return [a[0]+b[0],a[1]+b[1]];
+}
+
+cnv.width = size[0];
+cnv.height = size[1];
+start();
+function start() {
+    newBranch(10,1,[0,1],[size[0]/2,size[1]]);
+}
+function newBranch(max,n,vec,startPos) {
+    for (let i=0;i<3;i++) {
+        const nangle = rotateVec(vec,newAngle(n,i));
+        const npos = addVec(startPos,scaleVec(nangle,-lengthN(n,i)));
+        console.log("path",startPos,npos);
+        ctx.lineWidth = radiusN(n,i);
+        if (n<max-2) {
+            ctx.strokeStyle = `hsl(10,50%,20%)`;
+        }
+        else {
+            ctx.strokeStyle = `hsl(100,30%,30%)`;
+        }
+        ctx.beginPath();
+        ctx.moveTo(...startPos);
+        ctx.lineTo(...npos);
+        ctx.stroke();
+        if (n<max) {
+            newBranch(max,n+1,nangle,npos);
+        }
+    }
+}
+
+</script>
+<style>
+
+:root {
+    color-scheme: dark;
+}
+
+#out {
+    background-color: white;
+    border: 1px solid;
+}
+
+</style>
