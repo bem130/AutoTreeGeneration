@@ -13,6 +13,18 @@ const size = [1700,900]
 const cnv = document.querySelector("#out");
 const ctx = cnv.getContext("2d");
 
+function drawBranch(pointA,pointB,radius,color) {
+    ctx.lineWidth = radius;
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(...pointA);
+    ctx.lineTo(...pointB);
+    ctx.stroke();
+}
+
+</script>
+<script>
+
 function lengthN(param,n,i) {
     return param.RootLen*(param.Ps**(n-1))*(param.Psi**(i-1));
 }
@@ -37,7 +49,6 @@ function scaleVec(vec,scale) {
     return [vec[0]*scale,vec[1]*scale];
 }
 function addVec(a,b) {
-    console.log(a,b)
     return [a[0]+b[0],a[1]+b[1]];
 }
 
@@ -70,18 +81,17 @@ function newBranch(param,max,n,vec,startPos,I=1) {
         if (n<max) {
             newBranch(param,max,n+1,nangle,npos,Math.random()*param.branchNum[1]+param.branchNum[0]);
         }
+        let color;
+        let radius;
         if (n<8) {
-            ctx.strokeStyle = `hsl(${rnd(...param.branchColor[0])},${rnd(...param.branchColor[1])}%,${rnd(...param.branchColor[2])}%)`;
-            ctx.lineWidth = radiusN(param,n,i);
+            color = `hsl(${rnd(...param.branchColor[0])},${rnd(...param.branchColor[1])}%,${rnd(...param.branchColor[2])}%)`;
+            radius = radiusN(param,n,i);
         }
         else {
-            ctx.strokeStyle = `hsl(${rnd(...param.leafColor[0])},${rnd(...param.leafColor[1])}%,${rnd(...param.leafColor[2])}%)`;
-            ctx.lineWidth = radiusN(param,n,i)*2;
+            color = `hsl(${rnd(...param.leafColor[0])},${rnd(...param.leafColor[1])}%,${rnd(...param.leafColor[2])}%)`;
+            radius = radiusN(param,n,i)*2;
         }
-        ctx.beginPath();
-        ctx.moveTo(...startPos);
-        ctx.lineTo(...npos);
-        ctx.stroke();
+        drawBranch(startPos,npos,radius,color)
     }
 }
 
